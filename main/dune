@@ -1,0 +1,8 @@
+(executable
+ (name main)
+ (libraries a3lib))
+
+(install
+ (section bin)
+ (files
+  (main.exe as main)))
