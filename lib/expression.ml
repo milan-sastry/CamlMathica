@@ -27,15 +27,36 @@ open ExpressionLibrary
 (* evaluate : evaluates an expression for a particular value of x. 
  *  Example : evaluate (parse "x*x + 3") 2.0 = 7.0 *)
 let rec evaluate (e:expression) (x:float) : float =
-  failwith "Not implemented" 
+  match e with
+  | Num n -> n
+  | Var -> x
+  | Binop (b, exp1, exp2) -> 
+    let value1 = evaluate exp1 x in
+    let value2 = evaluate exp2 x in
+    match b with
+    | Add -> value1 +. value2
+    | Sub -> value1 -. value2
+    | Mul -> value1 *. value2
 
+(* let _ = print_float (evaluate (parse "x*x*x + x*x + 3") 2.0) *)
 
 
 (*>* Problem 2.2 *>*)
 
 (* See writeup for instructions.  *)
 let rec derivative (e:expression) : expression =
-  failwith "Not implemented"
+  match e with
+  | Num n -> Num 0.0
+  | Var -> Num 1.0
+  | Binop (b, exp1, exp2) -> 
+    let value1 = derivative exp1 in
+    let value2 = derivative exp2 in
+    match b with
+    | Add -> Binop (Add, value1, value2)
+    | Sub -> Binop (Sub, value1, value2)
+    | Mul -> Binop (Add, Binop (Mul, exp1, value2), Binop (Mul, value1, exp2))
+
+let _ = print_float (evaluate (derivative (parse "x*x*x*x + x*x + 3")) 2.0)
 
 
 
@@ -50,7 +71,9 @@ let checkexp strs xval=
 	print_endline " ";
 	print_string (to_string (derivative parsed));
 	print_endline " ")
-
+(* 
+  let _ = checkexp "x*x + 3" 2.0
+  let _ = checkexp "x*x*x + x*x + 3" 2.0 *)
 
 (*>* Problem 2.3 *>*)
 

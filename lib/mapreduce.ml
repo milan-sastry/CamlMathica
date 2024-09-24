@@ -74,12 +74,11 @@ let rec reduce (f:'a -> 'b -> 'b) (u:'b) (xs:'a list) : 'b =
 
 (*  negate_all : Flips the sign of each element in a list *)
 let negate_all (nums:int list) : int list =
-  failwith "Not implemented"
+  map (fun x -> -x) nums
 
 
 (* Unit test example.  Uncomment after writing negate_all *)
-(* let _ = assert ((negate_all [1; -2; 0]) = [-1; 2; 0]) *)
-
+let _ = assert ((negate_all [1; -2; 0]) = [-1; 2; 0])
 
 (*>* Problem 1.1.b *>*)
 
@@ -88,8 +87,11 @@ let negate_all (nums:int list) : int list =
  *             sum of the corresponding row in the input.
  *   Example : sum_rows [[1;2]; [3;4]] = [3; 7] *)
 let sum_rows (rows:int list list) : int list =
-  failwith "Not implemented"
+  map (fun x -> foldl (+) 0 x) rows
 
+let _ = assert ((sum_rows [[1;2]; [3;4]]) = [3; 7])
+let _ = assert ((sum_rows [[1;2;3]; [4;5;6]; [7;8;9]]) = [6; 15; 24])
+let _ = assert ((sum_rows [[1;2;3]; [4;5;6]; [7;8;9]; [10;11;12]]) = [6; 15; 24; 33])
 
 
 (*>* Problem 1.1.c *>*)
@@ -97,18 +99,16 @@ let sum_rows (rows:int list list) : int list =
 (*  num_occurs : Returns the number of times a given number appears in a list.
  *     Example : num_occurs 4 [1;3;4;5;4] = 2 *)
 let num_occurs (n:int) (nums:int list) : int =
-  failwith "Not implemented"
+  foldl (fun acc x -> if x = n then acc + 1 else acc) 0 nums 
 
-
+(* let _ = print_int (num_occurs 4 [1;3;4;5;4;4;4;]) *)
 
 (*>* Problem 1.1.d *>*)
 
 (*  super_sum : Sums all of the numbers in a list of int lists
  *    Example : super_sum [[1;2;3];[];[5]] = 11 *)
 let super_sum (nlists:int list list) : int =
-  failwith "Not implemented"
-
-
+  foldl (+) 0 (map (foldl (+) 0) nlists)
 
 (****************************************************)
 (**********       1.2 A Bigger Challenge   **********)
@@ -150,8 +150,18 @@ let super_sum (nlists:int list list) : int =
  *)
 
 let consec_dedupe (eq:'a -> 'a -> bool) (xs:'a list) : 'a list =
-  failwith "Not implemented"
+  let func x acc = 
+    match acc with
+    | [] -> [x]
+    | hd::tl -> if (eq hd x) then acc else x::acc
+  in
+  reduce func [] xs 
 
+let nocase_eq (s1:string) (s2:string) : bool = 
+String.uppercase_ascii s1 = String.uppercase_ascii s2
+let print_list arr = List.iter (Printf.printf "%d : ") arr
+(* let _ = print_list (consec_dedupe (nocase_eq) ["hello"; "HELLOa"; "world"; "WORLD";"world";"WORlD";"world";"wOrd";"word";"world";"WoRlD"])
+ *)
 
 (*>* Problem 1.2.b *>*)
 
@@ -163,10 +173,38 @@ let consec_dedupe (eq:'a -> 'a -> bool) (xs:'a list) : 'a list =
  * There are no non-empty prefixes of an empty list.
 *)
 
+(* Appends lst2 to the end of lst1 *)
+let append lst1 lst2 =
+  reduce (fun x acc -> x :: acc) lst2 lst1
+
+(* let _ = print_list (append [1;2;3;] [4]) *)
+
+(* fold_left f init [b1; ...; bn] is f (... (f (f init b1) b2) ...) bn. *)
+
 let prefixes (xs: 'a list) : 'a list list =
-  failwith "Not implemented"
+  let aux (acc,last) x = 
+    let next = append last [x] in
+      (append acc [next], next)
+  in
+  let (result,_) = foldl aux ([],[]) xs in
+  result
+
+(* Convert a list of integers to a string *)
+let string_of_int_list lst =
+  "[" ^ (String.concat "; " (List.map string_of_int lst)) ^ "]"
+
+(* Convert a list of lists of integers to a string *)
+let string_of_int_list_list lst =
+  "[" ^ (String.concat "; " (List.map string_of_int_list lst)) ^ "]"
+
+(* Print a list of lists of integers *)
+let print_int_list_list lst =
+  print_endline (string_of_int_list_list lst)
 
 
+let _ = print_int_list_list (prefixes [1;2;3;4])
+
+(* let _ = print_int_list_list [[1]; [1;2]; [1;2;3]; [1;2;3;4]] *)
 
 (*>* Problem 1.2.c *>*)
 (* flatten : write a function that flattens a list of lists into a single
@@ -180,5 +218,10 @@ let prefixes (xs: 'a list) : 'a list list =
  *)
 
 let flatten (xss:'a list list) : 'a list =
-  failwith "Not implemented"
+  foldl (fun x acc -> append x acc) [] xss
+
+let _ = print_list (flatten [[1;2;3]; [];[];[1;2;3]; [0]; [4;5]])
+
+
+
 
